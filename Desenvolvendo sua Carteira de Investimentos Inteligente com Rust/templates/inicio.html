@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minha carteira</title><link rel="stylesheet" href="/estatico/estilos.css">
+</head>
+<body>
+  <header class="cabecalho"><a class="marca" href="/">◈ carteira</a><div class="usuario">Olá, {{ nome }} <form method="post" action="/sair"><button class="botao-texto">Sair</button></form></div></header>
+  <main class="conteudo">
+    <section class="apresentacao"><div><p class="sobretitulo">VISÃO GERAL</p><h1>Sua carteira</h1><p class="texto-suave">Uma visão clara do seu patrimônio investido.</p></div><button class="botao-secundario" onclick="document.getElementById('formulario-ativo').showModal()">+ Adicionar ativo</button></section>
+    <section class="resumo">
+      <article><span>Patrimônio atual</span><strong>R$ {{ "{:.2}"|format(total_atual) }}</strong></article>
+      <article><span>Total investido</span><strong>R$ {{ "{:.2}"|format(total_investido) }}</strong></article>
+      <article><span>Resultado</span><strong class="{% if resultado >= 0.0 %}positivo{% else %}negativo{% endif %}">R$ {{ "{:.2}"|format(resultado) }}</strong></article>
+    </section>
+    <section class="lista-ativos"><div class="titulo-secao"><h2>Ativos</h2><span>{{ ativos.len() }} cadastrados</span></div>
+      {% if ativos.is_empty() %}
+        <div class="vazio"><p>Você ainda não adicionou nenhum ativo.</p><button onclick="document.getElementById('formulario-ativo').showModal()">Adicionar primeiro ativo</button></div>
+      {% else %}
+      <div class="tabela"><div class="linha cabecalho-tabela"><span>Ativo</span><span>Quantidade</span><span>Preço médio</span><span>Valor atual</span><span>Resultado</span><span></span></div>
+      {% for ativo in ativos %}<div class="linha"><div><strong>{{ ativo.codigo }}</strong><small>{{ ativo.nome }} · {{ ativo.tipo }}</small></div><span>{{ "{:.2}"|format(ativo.quantidade) }}</span><span>R$ {{ "{:.2}"|format(ativo.preco_medio) }}</span><span>R$ {{ "{:.2}"|format(ativo.valor_atual()) }}</span><span class="{% if ativo.resultado() >= 0.0 %}positivo{% else %}negativo{% endif %}">R$ {{ "{:.2}"|format(ativo.resultado()) }}</span><form method="post" action="/ativos/{{ ativo.id }}/excluir"><button class="excluir" title="Excluir ativo">×</button></form></div>{% endfor %}</div>
+      {% endif %}
+    </section>
+  </main>
+  <dialog id="formulario-ativo"><form method="post" action="/ativos" class="formulario formulario-modal"><div class="titulo-modal"><h2>Adicionar ativo</h2><button type="button" class="excluir" onclick="this.closest('dialog').close()">×</button></div><label>Código<input required name="codigo" placeholder="PETR4" maxlength="16"></label><label>Nome<input required name="nome" placeholder="Petrobras PN" maxlength="120"></label><label>Tipo<select name="tipo"><option>Ação</option><option>FII</option><option>ETF</option><option>Renda fixa</option><option>Criptoativo</option><option>Outro</option></select></label><div class="campos-duplos"><label>Quantidade<input required name="quantidade" type="number" step="0.000001" min="0.000001"></label><label>Preço médio<input required name="preco_medio" type="number" step="0.01" min="0"></label></div><label>Preço atual<input required name="preco_atual" type="number" step="0.01" min="0"></label><button type="submit">Salvar ativo</button></form></dialog>
+</body>
+</html>
